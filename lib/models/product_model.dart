@@ -1,5 +1,5 @@
 class Product {
-  final String id;
+  final int id;
   final String title;
   final double price;
   final String description;
@@ -20,9 +20,9 @@ class Product {
       id : json['id'],
       title : json['title'],
       price : (json['price'] as num).toDouble(),
-      description : json['descrption'],
+      description : json['description'],
       category : json['category'],
       image : json['image'],
-      );
+    );
   }
 }

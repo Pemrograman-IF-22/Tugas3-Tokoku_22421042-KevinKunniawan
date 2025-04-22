@@ -1,7 +1,42 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-class HomeScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../models/product_model.dart';
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<Product> _products = [];
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    final response = await http.get(
+      Uri.parse('https://fakestoreapi.com/products')
+    );
+
+    debugPrint('Response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+
+      setState(() {
+        _products = data.map((json) => Product.fromJson(json)).toList();
+      });
+    } else {
+      throw Exception('gagal mengambil data produk');
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +52,10 @@ class HomeScreen extends StatelessWidget {
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
         ),
-        itemCount: 10,
+        itemCount: _products.length,
         itemBuilder: (context, index) {
+          final product = _products[index];
+
           return Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,7 +64,7 @@ class HomeScreen extends StatelessWidget {
                   height: 180,
                   width: double.infinity,
                   child: Image.network(
-                    'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
+                    product.image,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -37,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                   vertical: 4,
                   ),
                   child: Text(
-                    'Kategori ${index +1 }',
+                    product.category,
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.grey
@@ -50,21 +87,22 @@ class HomeScreen extends StatelessWidget {
                   vertical: 4,
                   ),
                   child: Text(
-                    'Produk ${index +1 }',
+                    product.title,
                   style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold
+                    fontWeight: FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(
+                 Padding(
+                  padding: const EdgeInsets.symmetric(
                   horizontal: 8,
                   vertical: 4,
                   ),
                   child: Text(
-                    '\$20.0',
-                  style: TextStyle(
+                    '\$${product.price}',
+                  style: const TextStyle(
                     color: Colors.grey
                     ),
                   ),
